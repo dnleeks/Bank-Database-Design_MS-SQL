@@ -26,8 +26,8 @@ GO
 CREATE TABLE UserLogins
 (
 	UserLoginID SMALLINT NOT NULL IDENTITY(1,1),
-	UserLogin VARCHAR(50) NOT NULL,
-	UserPassword VARCHAR(20) NOT NULL,
+	UserLogin NVARCHAR(50) NOT NULL,
+	UserPassword NVARCHAR(20) NOT NULL,
 	CONSTRAINT pk_UL_UserLoginID PRIMARY KEY(UserLoginID)
 );
 GO
@@ -36,7 +36,7 @@ GO
 CREATE TABLE UserSecurityQuestions
 (
 	UserSecurityQuestionID TINYINT NOT NULL IDENTITY(1,1),
-	UserSecurityQuestion VARCHAR(50) NOT NULL,
+	UserSecurityQuestion NVARCHAR(50) NOT NULL,
 	CONSTRAINT pk_USQ_UserSecurityQuestionID PRIMARY KEY(UserSecurityQuestionID)
 );
 GO
@@ -46,7 +46,7 @@ GO
 CREATE TABLE AccountType
 (
 	AccountTypeID TINYINT NOT NULL IDENTITY(1,1),
-	AccountTypeDescription VARCHAR(30) NOT NULL,
+	AccountTypeDescription NVARCHAR(30) NOT NULL,
 	CONSTRAINT pk_AT_AccountTypeID PRIMARY KEY(AccountTypeID)
 );
 GO
@@ -58,7 +58,7 @@ CREATE TABLE SavingsInterestRates
 (
 	InterestSavingRatesID TINYINT NOT NULL IDENTITY(1,1),
 	InterestRatesValue NUMERIC(9,9) NOT NULL, 
-	InterestRatesDescription VARCHAR(20) NOT NULL,
+	InterestRatesDescription NVARCHAR(20) NOT NULL,
 	CONSTRAINT pk_SIR_InterestSavingRatesID PRIMARY KEY(InterestSavingRatesID)
 );
 GO
@@ -67,7 +67,7 @@ GO
 CREATE TABLE AccountStatusType
 (
 	AccountStatusTypeID TINYINT NOT NULL IDENTITY(1,1),
-	AccountStatusTypeDescription VARCHAR(30) NOT NULL,
+	AccountStatusTypeDescription NVARCHAR(30) NOT NULL,
 	CONSTRAINT pk_AST_AccountStatusTypeID PRIMARY KEY(AccountStatusTypeID)
 );
 GO
@@ -76,7 +76,7 @@ GO
 CREATE TABLE FailedTransactionErrorType
 (
 	FailedTransactionErrorTypeID TINYINT NOT NULL IDENTITY(1,1),
-	FailedTransactionErrorTypeDescription VARCHAR(50) NOT NULL,
+	FailedTransactionErrorTypeDescription NVARCHAR(50) NOT NULL,
 	CONSTRAINT pk_FTET_FailedTransactionErrorTypeID PRIMARY KEY(FailedTransactionErrorTypeID)
 );
 GO
@@ -95,9 +95,9 @@ GO
 CREATE TABLE Employee
 (
 	EmployeeID INT NOT NULL IDENTITY(1,1),
-	EmployeeFirstName VARCHAR(25) NOT NULL,
-	EmployeeMiddleInitial CHAR(1),
-	EmployeeLastName VARCHAR(25),
+	EmployeeFirstName NVARCHAR(25) NOT NULL,
+	EmployeeMiddleInitial NCHAR(1),
+	EmployeeLastName NVARCHAR(25),
 	EmployeeisManager BIT,
 	CONSTRAINT pk_E_EmployeeID PRIMARY KEY(EmployeeID)
 );
@@ -107,8 +107,8 @@ GO
 CREATE TABLE TransactionType
 (
 	TransactionTypeID TINYINT NOT NULL IDENTITY(1,1),
-	TransactionTypeName CHAR(10) NOT NULL,
-	TransactionTypeDescription VARCHAR(50),
+	TransactionTypeName NCHAR(10) NOT NULL,
+	TransactionTypeDescription NVARCHAR(50),
 	TransactionFeeAmount SMALLMONEY,
 	CONSTRAINT pk_TT_TransactionTypeID PRIMARY KEY(TransactionTypeID)
 );
@@ -131,7 +131,7 @@ GO
 CREATE TABLE UserSecurityAnswers
 (
 	UserLoginID SMALLINT NOT NULL IDENTITY(1,1),
-	UserSecurityAnswers VARCHAR(25) NOT NULL,
+	UserSecurityAnswers NVARCHAR(25) NOT NULL,
 	UserSecurityQuestionID TINYINT NOT NULL,
 	CONSTRAINT pk_USA_UserLoginID PRIMARY KEY(UserLoginID), 
 	CONSTRAINT fk_UL_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID),
@@ -168,19 +168,19 @@ CREATE TABLE Customer
 (
 	CustomerID INT NOT NULL IDENTITY(1,1),
 	AccountID INT NOT NULL,
-	CustomerAddress1 VARCHAR(30) NOT NULL,
-	CustomerAddress2  VARCHAR(30),
-	CustomerFirstName  VARCHAR(30) NOT NULL,
-	CustomerMiddleInitial CHAR(1),
-	CustomerLastName  VARCHAR(30) NOT NULL,
-	City  VARCHAR(20) NOT NULL,
-	State CHAR(2) NOT NULL,
-	ZipCode CHAR(10) NOT NULL,
-	EmailAddress CHAR(40) NOT NULL,
-	HomePhone VARCHAR(10) NOT NULL,
-	CellPhone VARCHAR(10) NOT NULL,
-	WorkPhone VARCHAR(10) NOT NULL,
-	SSN VARCHAR(9),
+	CustomerAddress1 NVARCHAR(30) NOT NULL,
+	CustomerAddress2  NVARCHAR(30),
+	CustomerFirstName  NVARCHAR(30) NOT NULL,
+	CustomerMiddleInitial NCHAR(1),
+	CustomerLastName  NVARCHAR(30) NOT NULL,
+	City  NVARCHAR(20) NOT NULL,
+	State NCHAR(2) NOT NULL,
+	ZipCode NCHAR(10) NOT NULL,
+	EmailAddress NCHAR(40) NOT NULL,
+	HomePhone NVARCHAR(10) NOT NULL,
+	CellPhone NVARCHAR(10) NOT NULL,
+	WorkPhone NVARCHAR(10) NOT NULL,
+	SSN NVARCHAR(9),
 	UserLoginID SMALLINT NOT NULL,
 	CONSTRAINT pk_C_CustomerID PRIMARY KEY(CustomerID),
 	CONSTRAINT fk_A_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID),
