@@ -23,6 +23,8 @@ GO
 -- Creating tables only with primary keys first 
 
 --Creating table named UserLogins
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserLogins]') AND type in (N'U'))
+BEGIN
 CREATE TABLE UserLogins
 (
 	UserLoginID SMALLINT NOT NULL IDENTITY(1,1),
@@ -30,30 +32,39 @@ CREATE TABLE UserLogins
 	UserPassword NVARCHAR(20) NOT NULL,
 	CONSTRAINT pk_UL_UserLoginID PRIMARY KEY(UserLoginID)
 );
+END
 GO
 
 --Creating table named UserSecurityQuestions
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserSecurityQuestions]') AND type in (N'U'))
+BEGIN
 CREATE TABLE UserSecurityQuestions
 (
 	UserSecurityQuestionID TINYINT NOT NULL IDENTITY(1,1),
 	UserSecurityQuestion NVARCHAR(50) NOT NULL,
 	CONSTRAINT pk_USQ_UserSecurityQuestionID PRIMARY KEY(UserSecurityQuestionID)
 );
+END
 GO
 
 
 --Creating table named AccountType
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountType]') AND type in (N'U'))
+BEGIN
 CREATE TABLE AccountType
 (
 	AccountTypeID TINYINT NOT NULL IDENTITY(1,1),
 	AccountTypeDescription NVARCHAR(30) NOT NULL,
 	CONSTRAINT pk_AT_AccountTypeID PRIMARY KEY(AccountTypeID)
 );
+END
 GO
 
 --Creating table named SavingsInterestRates
 /* NOTE:  Altered the table to accept datatype as NUMERIC(9,2) in order to avoid Arithmetic Conversion error using 
 code "ALTER TABLE SavingsInterestRates ALTER COLUMN IntetestRatesValue NUMERIC(9,2);" */
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SavingsInterestRates]') AND type in (N'U'))
+BEGIN
 CREATE TABLE SavingsInterestRates
 (
 	InterestSavingRatesID TINYINT NOT NULL IDENTITY(1,1),
@@ -61,27 +72,36 @@ CREATE TABLE SavingsInterestRates
 	InterestRatesDescription NVARCHAR(20) NOT NULL,
 	CONSTRAINT pk_SIR_InterestSavingRatesID PRIMARY KEY(InterestSavingRatesID)
 );
+END
 GO
 
 --Creating table named AccountStatusType
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountStatusType]') AND type in (N'U'))
+BEGIN
 CREATE TABLE AccountStatusType
 (
 	AccountStatusTypeID TINYINT NOT NULL IDENTITY(1,1),
 	AccountStatusTypeDescription NVARCHAR(30) NOT NULL,
 	CONSTRAINT pk_AST_AccountStatusTypeID PRIMARY KEY(AccountStatusTypeID)
 );
+END
 GO
 
 --Creating table named FailedTransactionErrorType
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FailedTransactionErrorType]') AND type in (N'U'))
+BEGIN
 CREATE TABLE FailedTransactionErrorType
 (
 	FailedTransactionErrorTypeID TINYINT NOT NULL IDENTITY(1,1),
 	FailedTransactionErrorTypeDescription NVARCHAR(50) NOT NULL,
 	CONSTRAINT pk_FTET_FailedTransactionErrorTypeID PRIMARY KEY(FailedTransactionErrorTypeID)
 );
+END
 GO
 
 --Creating table named LoginErrorLog
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LoginErrorLog]') AND type in (N'U'))
+BEGIN
 CREATE TABLE LoginErrorLog
 (
 	ErrorLogID INT NOT NULL IDENTITY(1,1),
@@ -89,9 +109,12 @@ CREATE TABLE LoginErrorLog
 	FailedTransactionXML XML,
 	CONSTRAINT pk_LEL_ErrorLogID PRIMARY KEY(ErrorLogID)
 );
+END
 GO
 
 --Creating table named Employee
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Employee]') AND type in (N'U'))
+BEGIN
 CREATE TABLE Employee
 (
 	EmployeeID INT NOT NULL IDENTITY(1,1),
@@ -101,9 +124,12 @@ CREATE TABLE Employee
 	EmployeeisManager BIT,
 	CONSTRAINT pk_E_EmployeeID PRIMARY KEY(EmployeeID)
 );
+END
 GO
 
 --Creating table named TransactionType
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TransactionType]') AND type in (N'U'))
+BEGIN
 CREATE TABLE TransactionType
 (
 	TransactionTypeID TINYINT NOT NULL IDENTITY(1,1),
@@ -112,10 +138,13 @@ CREATE TABLE TransactionType
 	TransactionFeeAmount SMALLMONEY,
 	CONSTRAINT pk_TT_TransactionTypeID PRIMARY KEY(TransactionTypeID)
 );
+END
 GO
 
 -- Creating tables with foreign key and combination of both primary and foreign keys 
 --Creating table named FailedTransactionLog
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FailedTransactionLog]') AND type in (N'U'))
+BEGIN
 CREATE TABLE FailedTransactionLog
 (
 	FailedTransactionID INT NOT NULL IDENTITY(1,1),
@@ -125,9 +154,12 @@ CREATE TABLE FailedTransactionLog
 	CONSTRAINT pk_FTL_FailedTransactionID PRIMARY KEY(FailedTransactionID),
 	CONSTRAINT fk_FTET_FailedTransactionErrorTypeID FOREIGN KEY(FailedTransactionErrorTypeID) REFERENCES FailedTransactionErrorType(FailedTransactionErrorTypeID) 
 );
+END
 GO
 
 --Creating table named UserSecurityAnswers
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]') AND type in (N'U'))
+BEGIN
 CREATE TABLE UserSecurityAnswers
 (
 	UserLoginID SMALLINT NOT NULL IDENTITY(1,1),
@@ -137,8 +169,12 @@ CREATE TABLE UserSecurityAnswers
 	CONSTRAINT fk_UL_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID),
 	CONSTRAINT fk_USQ_UserSecurityQuestionID FOREIGN KEY(UserSecurityQuestionID) REFERENCES UserSecurityQuestions(UserSecurityQuestionID)
 );
+END
 GO
+
 --Creating table named Account
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Account]') AND type in (N'U'))
+BEGIN
 CREATE TABLE Account
 (
 	AccountID INT NOT NULL IDENTITY(1,1),
@@ -150,10 +186,13 @@ CREATE TABLE Account
 	CONSTRAINT fk_AST_AccountStatusTypeID FOREIGN KEY(AccountStatusTypeID) REFERENCES AccountStatusType(AccountStatusTypeID),
 	CONSTRAINT fk_SIR_InterestSavingRatesID FOREIGN KEY(InterestSavingRatesID) REFERENCES SavingsInterestRates(InterestSavingRatesID)
 );
+END
 GO
 
 --Creating table named LoginAccount
 --NOTE: Unlike ER diagram table name has been used as LoginAccounts instead of Login-Account
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LoginAccount]') AND type in (N'U'))
+BEGIN
 CREATE TABLE LoginAccount
 (
 	UserLoginID SMALLINT NOT NULL,
@@ -161,9 +200,12 @@ CREATE TABLE LoginAccount
 	CONSTRAINT fk_UL_UserLogins FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID),
 	CONSTRAINT fk_A_Account FOREIGN KEY(AccountID) REFERENCES Account(AccountID)
 );
+END
 GO
 
 --Creating table named Customer
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Customer]') AND type in (N'U'))
+BEGIN
 CREATE TABLE Customer
 (
 	CustomerID INT NOT NULL IDENTITY(1,1),
@@ -186,10 +228,13 @@ CREATE TABLE Customer
 	CONSTRAINT fk_A_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID),
 	CONSTRAINT fk_UL_C_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID)  
 );
+END
 GO
 
 --Creating table named CustomerAccount
 --NOTE: Unlike ER diagram table name has been used as CustomerAccounts instead of Customer-Account
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CustomerAccount]') AND type in (N'U'))
+BEGIN
 CREATE TABLE CustomerAccount
 (
 	AccountID INT NOT NULL ,
@@ -197,9 +242,12 @@ CREATE TABLE CustomerAccount
 	CONSTRAINT fk_A_CA_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID),
 	CONSTRAINT fk_C_CA_CustomerID FOREIGN KEY(CustomerID) REFERENCES Customer(CustomerID)
 );
+END
 GO
 
 --Creating table named TransactionLog
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TransactionLog]') AND type in (N'U'))
+BEGIN
 CREATE TABLE TransactionLog
 (
 	TransactionID INT NOT NULL IDENTITY(1,1),
@@ -218,9 +266,12 @@ CREATE TABLE TransactionLog
 	CONSTRAINT fk_E_TL_EmployeeID FOREIGN KEY(EmployeeID) REFERENCES Employee(EmployeeID),
 	CONSTRAINT fk_UL_TL_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID)    
 );
+END
 GO
 
 --Creating table named OverDraftLog
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OverDraftLog]') AND type in (N'U'))
+BEGIN
 CREATE TABLE OverDraftLog
 (
 	AccountID INT NOT NULL IDENTITY(1,1),
@@ -230,6 +281,7 @@ CREATE TABLE OverDraftLog
 	CONSTRAINT Pk_ODL_AccountID PRIMARY KEY(AccountID),
 	CONSTRAINT fk_A_ODL_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID)
 );
+END
 GO
 
 --Q4. Insert at least 5 rows in each table. 
