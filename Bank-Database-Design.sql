@@ -1,448 +1,436 @@
-
 /* ## MS-SQL PROJECT on Banking Transactions by Gyan Kumar GM ! */
 
--- PHASE I of project begins 
+-- (dnleeks): I have cleaned up the project.
+-- 1. Do not create objects if they exist. For updates use the ALTER keyword.
+-- 2. Test data will be in another file.
 
---Q1. Create a database for a banking application called 'Bank'. 
 
-create database dbBankGM;
+CREATE DATABASE dbBankGM;
 GO
 
-/* NOTE: Unlike asked in question database name has been used as 'dbBankGM' instead of 'Bank' in order to make it unique 
-from other students. Following code is used to select 'dbBankGM' as current database */
-
-use dbBankGM;
+USE [dbBankGM]
 GO
 
---Q2. Create all the tables mentioned in the database diagram. 
---Q3. Create all the constraints based on the database diagram. 
-
---NOTE: Solution to questions 2 and 3 are provided at once as follows. This was confirmed with teacher! 
-
-/* CREATE TABLE & ADD CONSTRAINTS Section */
--- Creating tables only with primary keys first 
-
---Creating table named UserLogins
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserLogins]') AND type in (N'U'))
-BEGIN
-CREATE TABLE UserLogins
-(
-	UserLoginID SMALLINT NOT NULL IDENTITY(1,1),
-	UserLogin NVARCHAR(50) NOT NULL,
-	UserPassword NVARCHAR(20) NOT NULL,
-	CONSTRAINT pk_UL_UserLoginID PRIMARY KEY(UserLoginID)
-);
-END
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
 GO
 
---Creating table named UserSecurityQuestions
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserSecurityQuestions]') AND type in (N'U'))
-BEGIN
-CREATE TABLE UserSecurityQuestions
-(
-	UserSecurityQuestionID TINYINT NOT NULL IDENTITY(1,1),
-	UserSecurityQuestion NVARCHAR(50) NOT NULL,
-	CONSTRAINT pk_USQ_UserSecurityQuestionID PRIMARY KEY(UserSecurityQuestionID)
-);
-END
-GO
-
-
---Creating table named AccountType
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountType]') AND type in (N'U'))
-BEGIN
-CREATE TABLE AccountType
-(
-	AccountTypeID TINYINT NOT NULL IDENTITY(1,1),
-	AccountTypeDescription NVARCHAR(30) NOT NULL,
-	CONSTRAINT pk_AT_AccountTypeID PRIMARY KEY(AccountTypeID)
-);
-END
-GO
-
---Creating table named SavingsInterestRates
-/* NOTE:  Altered the table to accept datatype as NUMERIC(9,2) in order to avoid Arithmetic Conversion error using 
-code "ALTER TABLE SavingsInterestRates ALTER COLUMN IntetestRatesValue NUMERIC(9,2);" */
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SavingsInterestRates]') AND type in (N'U'))
-BEGIN
-CREATE TABLE SavingsInterestRates
-(
-	InterestSavingRatesID TINYINT NOT NULL IDENTITY(1,1),
-	InterestRatesValue NUMERIC(9,9) NOT NULL, 
-	InterestRatesDescription NVARCHAR(20) NOT NULL,
-	CONSTRAINT pk_SIR_InterestSavingRatesID PRIMARY KEY(InterestSavingRatesID)
-);
-END
-GO
-
---Creating table named AccountStatusType
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountStatusType]') AND type in (N'U'))
-BEGIN
-CREATE TABLE AccountStatusType
-(
-	AccountStatusTypeID TINYINT NOT NULL IDENTITY(1,1),
-	AccountStatusTypeDescription NVARCHAR(30) NOT NULL,
-	CONSTRAINT pk_AST_AccountStatusTypeID PRIMARY KEY(AccountStatusTypeID)
-);
-END
-GO
-
---Creating table named FailedTransactionErrorType
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FailedTransactionErrorType]') AND type in (N'U'))
-BEGIN
-CREATE TABLE FailedTransactionErrorType
-(
-	FailedTransactionErrorTypeID TINYINT NOT NULL IDENTITY(1,1),
-	FailedTransactionErrorTypeDescription NVARCHAR(50) NOT NULL,
-	CONSTRAINT pk_FTET_FailedTransactionErrorTypeID PRIMARY KEY(FailedTransactionErrorTypeID)
-);
-END
-GO
-
---Creating table named LoginErrorLog
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LoginErrorLog]') AND type in (N'U'))
-BEGIN
-CREATE TABLE LoginErrorLog
-(
-	ErrorLogID INT NOT NULL IDENTITY(1,1),
-	ErrorTime DATETIME NOT NULL,
-	FailedTransactionXML XML,
-	CONSTRAINT pk_LEL_ErrorLogID PRIMARY KEY(ErrorLogID)
-);
-END
-GO
-
---Creating table named Employee
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Employee]') AND type in (N'U'))
-BEGIN
-CREATE TABLE Employee
-(
-	EmployeeID INT NOT NULL IDENTITY(1,1),
-	EmployeeFirstName NVARCHAR(25) NOT NULL,
-	EmployeeMiddleInitial NCHAR(1),
-	EmployeeLastName NVARCHAR(25),
-	EmployeeisManager BIT,
-	CONSTRAINT pk_E_EmployeeID PRIMARY KEY(EmployeeID)
-);
-END
-GO
-
---Creating table named TransactionType
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TransactionType]') AND type in (N'U'))
-BEGIN
-CREATE TABLE TransactionType
-(
-	TransactionTypeID TINYINT NOT NULL IDENTITY(1,1),
-	TransactionTypeName NCHAR(10) NOT NULL,
-	TransactionTypeDescription NVARCHAR(50),
-	TransactionFeeAmount SMALLMONEY,
-	CONSTRAINT pk_TT_TransactionTypeID PRIMARY KEY(TransactionTypeID)
-);
-END
-GO
-
--- Creating tables with foreign key and combination of both primary and foreign keys 
---Creating table named FailedTransactionLog
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FailedTransactionLog]') AND type in (N'U'))
-BEGIN
-CREATE TABLE FailedTransactionLog
-(
-	FailedTransactionID INT NOT NULL IDENTITY(1,1),
-	FailedTransactionErrorTypeID TINYINT NOT NULL,
-	FailedTransactionErrorTime DATETIME,
-	FailedTransactionErrorXML XML,
-	CONSTRAINT pk_FTL_FailedTransactionID PRIMARY KEY(FailedTransactionID),
-	CONSTRAINT fk_FTET_FailedTransactionErrorTypeID FOREIGN KEY(FailedTransactionErrorTypeID) REFERENCES FailedTransactionErrorType(FailedTransactionErrorTypeID) 
-);
-END
-GO
-
---Creating table named UserSecurityAnswers
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]') AND type in (N'U'))
-BEGIN
-CREATE TABLE UserSecurityAnswers
-(
-	UserLoginID SMALLINT NOT NULL IDENTITY(1,1),
-	UserSecurityAnswers NVARCHAR(25) NOT NULL,
-	UserSecurityQuestionID TINYINT NOT NULL,
-	CONSTRAINT pk_USA_UserLoginID PRIMARY KEY(UserLoginID), 
-	CONSTRAINT fk_UL_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID),
-	CONSTRAINT fk_USQ_UserSecurityQuestionID FOREIGN KEY(UserSecurityQuestionID) REFERENCES UserSecurityQuestions(UserSecurityQuestionID)
-);
-END
-GO
-
---Creating table named Account
+-- Create all tables if they do not exist
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Account]') AND type in (N'U'))
 BEGIN
-CREATE TABLE Account
+CREATE TABLE [dbo].[Account](
+	[AccountID] [int] IDENTITY(1,1) NOT NULL,
+	[CurrentBalance] [int] NOT NULL,
+	[AccountTypeID] [tinyint] NOT NULL,
+	[AccountStatusTypeID] [tinyint] NOT NULL,
+	[InterestSavingRatesID] [tinyint] NOT NULL,
+ CONSTRAINT [pk_A_AccounID] PRIMARY KEY CLUSTERED 
 (
-	AccountID INT NOT NULL IDENTITY(1,1),
-	CurrentBalance INT NOT NULL,
-	AccountTypeID TINYINT NOT NULL REFERENCES AccountType (AccountTypeID),
-	AccountStatusTypeID TINYINT NOT NULL,
-	InterestSavingRatesID TINYINT NOT NULL,
-	CONSTRAINT pk_A_AccounID PRIMARY KEY(AccountID),
-	CONSTRAINT fk_AST_AccountStatusTypeID FOREIGN KEY(AccountStatusTypeID) REFERENCES AccountStatusType(AccountStatusTypeID),
-	CONSTRAINT fk_SIR_InterestSavingRatesID FOREIGN KEY(InterestSavingRatesID) REFERENCES SavingsInterestRates(InterestSavingRatesID)
-);
+	[AccountID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
 END
 GO
 
---Creating table named LoginAccount
---NOTE: Unlike ER diagram table name has been used as LoginAccounts instead of Login-Account
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LoginAccount]') AND type in (N'U'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountStatusType]') AND type in (N'U'))
 BEGIN
-CREATE TABLE LoginAccount
+CREATE TABLE [dbo].[AccountStatusType](
+	[AccountStatusTypeID] [tinyint] IDENTITY(1,1) NOT NULL,
+	[AccountStatusTypeDescription] [nvarchar](30) NOT NULL,
+ CONSTRAINT [pk_AST_AccountStatusTypeID] PRIMARY KEY CLUSTERED 
 (
-	UserLoginID SMALLINT NOT NULL,
-	AccountID INT NOT NULL,
-	CONSTRAINT fk_UL_UserLogins FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID),
-	CONSTRAINT fk_A_Account FOREIGN KEY(AccountID) REFERENCES Account(AccountID)
-);
+	[AccountStatusTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
 END
 GO
 
---Creating table named Customer
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountType]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[AccountType](
+	[AccountTypeID] [tinyint] IDENTITY(1,1) NOT NULL,
+	[AccountTypeDescription] [nvarchar](30) NOT NULL,
+ CONSTRAINT [pk_AT_AccountTypeID] PRIMARY KEY CLUSTERED 
+(
+	[AccountTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
+GO
+
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Customer]') AND type in (N'U'))
 BEGIN
-CREATE TABLE Customer
+CREATE TABLE [dbo].[Customer](
+	[CustomerID] [int] IDENTITY(1,1) NOT NULL,
+	[AccountID] [int] NOT NULL,
+	[CustomerAddress2] [nvarchar](30) NULL,
+	[CustomerFirstName] [nvarchar](30) NOT NULL,
+	[CustomerMiddleInitial] [nchar](1) NULL,
+	[CustomerLastName] [nvarchar](30) NOT NULL,
+	[City] [nvarchar](20) NOT NULL,
+	[State] [nchar](2) NOT NULL,
+	[ZipCode] [nchar](10) NOT NULL,
+	[EmailAddress] [nchar](40) NOT NULL,
+	[HomePhone] [nvarchar](10) NOT NULL,
+	[CellPhone] [nvarchar](10) NOT NULL,
+	[WorkPhone] [nvarchar](10) NOT NULL,
+	[SSN] [nvarchar](9) NULL,
+	[UserLoginID] [smallint] NOT NULL,
+ CONSTRAINT [pk_C_CustomerID] PRIMARY KEY CLUSTERED 
 (
-	CustomerID INT NOT NULL IDENTITY(1,1),
-	AccountID INT NOT NULL,
-	CustomerAddress1 NVARCHAR(30) NOT NULL,
-	CustomerAddress2  NVARCHAR(30),
-	CustomerFirstName  NVARCHAR(30) NOT NULL,
-	CustomerMiddleInitial NCHAR(1),
-	CustomerLastName  NVARCHAR(30) NOT NULL,
-	City  NVARCHAR(20) NOT NULL,
-	State NCHAR(2) NOT NULL,
-	ZipCode NCHAR(10) NOT NULL,
-	EmailAddress NCHAR(40) NOT NULL,
-	HomePhone NVARCHAR(10) NOT NULL,
-	CellPhone NVARCHAR(10) NOT NULL,
-	WorkPhone NVARCHAR(10) NOT NULL,
-	SSN NVARCHAR(9),
-	UserLoginID SMALLINT NOT NULL,
-	CONSTRAINT pk_C_CustomerID PRIMARY KEY(CustomerID),
-	CONSTRAINT fk_A_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID),
-	CONSTRAINT fk_UL_C_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID)  
-);
+	[CustomerID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
 END
 GO
 
---Creating table named CustomerAccount
---NOTE: Unlike ER diagram table name has been used as CustomerAccounts instead of Customer-Account
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CustomerAccount]') AND type in (N'U'))
 BEGIN
-CREATE TABLE CustomerAccount
-(
-	AccountID INT NOT NULL ,
-	CustomerID INT NOT NULL,
-	CONSTRAINT fk_A_CA_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID),
-	CONSTRAINT fk_C_CA_CustomerID FOREIGN KEY(CustomerID) REFERENCES Customer(CustomerID)
-);
+CREATE TABLE [dbo].[CustomerAccount](
+	[AccountID] [int] NOT NULL,
+	[CustomerID] [int] NOT NULL
+) ON [PRIMARY]
 END
 GO
 
---Creating table named TransactionLog
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TransactionLog]') AND type in (N'U'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Employee]') AND type in (N'U'))
 BEGIN
-CREATE TABLE TransactionLog
+CREATE TABLE [dbo].[Employee](
+	[EmployeeID] [int] IDENTITY(1,1) NOT NULL,
+	[EmployeeFirstName] [nvarchar](25) NOT NULL,
+	[EmployeeMiddleInitial] [nchar](1) NULL,
+	[EmployeeLastName] [nvarchar](25) NULL,
+	[EmployeeisManager] [bit] NULL,
+ CONSTRAINT [pk_E_EmployeeID] PRIMARY KEY CLUSTERED 
 (
-	TransactionID INT NOT NULL IDENTITY(1,1),
-	TransactionDate DATETIME NOT NULL,
-	TransactionTypeID TINYINT NOT NULL,
-	TransactionAmount Money NOT NULL,
-	NewBalance Money NOT NULL,
-	AccountID INT NOT NULL,
-	CustomerID INT NOT NULL,
-	EmployeeID INT NOT NULL,
-	UserLoginID SMALLINT NOT NULL,
-	CONSTRAINT pk_TL_TransactionID PRIMARY KEY(TransactionID),
-	CONSTRAINT fk_TT_TL_TransactionTypeID FOREIGN KEY(TransactionTypeID) REFERENCES TransactionType(TransactionTypeID),
-	CONSTRAINT fk_A_TL_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID),
-	CONSTRAINT fk_C_TL_CustomerID FOREIGN KEY(CustomerID) REFERENCES Customer(CustomerID),
-	CONSTRAINT fk_E_TL_EmployeeID FOREIGN KEY(EmployeeID) REFERENCES Employee(EmployeeID),
-	CONSTRAINT fk_UL_TL_UserLoginID FOREIGN KEY(UserLoginID) REFERENCES UserLogins(UserLoginID)    
-);
+	[EmployeeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
 END
 GO
 
---Creating table named OverDraftLog
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FailedTransactionErrorType]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[FailedTransactionErrorType](
+	[FailedTransactionErrorTypeID] [tinyint] IDENTITY(1,1) NOT NULL,
+	[FailedTransactionErrorTypeDescription] [nvarchar](50) NOT NULL,
+ CONSTRAINT [pk_FTET_FailedTransactionErrorTypeID] PRIMARY KEY CLUSTERED 
+(
+	[FailedTransactionErrorTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FailedTransactionLog]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[FailedTransactionLog](
+	[FailedTransactionID] [int] IDENTITY(1,1) NOT NULL,
+	[FailedTransactionErrorTypeID] [tinyint] NOT NULL,
+	[FailedTransactionErrorTime] [datetime] NULL,
+	[FailedTransactionErrorXML] [xml] NULL,
+ CONSTRAINT [pk_FTL_FailedTransactionID] PRIMARY KEY CLUSTERED 
+(
+	[FailedTransactionID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LoginAccount]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[LoginAccount](
+	[UserLoginID] [smallint] NOT NULL,
+	[AccountID] [int] NOT NULL
+) ON [PRIMARY]
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[LoginErrorLog]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[LoginErrorLog](
+	[ErrorLogID] [int] IDENTITY(1,1) NOT NULL,
+	[ErrorTime] [datetime] NOT NULL,
+	[FailedTransactionXML] [xml] NULL,
+ CONSTRAINT [pk_LEL_ErrorLogID] PRIMARY KEY CLUSTERED 
+(
+	[ErrorLogID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+END
+GO
+
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OverDraftLog]') AND type in (N'U'))
 BEGIN
-CREATE TABLE OverDraftLog
+CREATE TABLE [dbo].[OverDraftLog](
+	[AccountID] [int] IDENTITY(1,1) NOT NULL,
+	[OverDraftDate] [datetime] NOT NULL,
+	[OverDraftAmount] [money] NOT NULL,
+	[OverDraftTransactionXML] [xml] NOT NULL,
+ CONSTRAINT [Pk_ODL_AccountID] PRIMARY KEY CLUSTERED 
 (
-	AccountID INT NOT NULL IDENTITY(1,1),
-	OverDraftDate DATETIME NOT NULL,
-	OverDraftAmount Money NOT NULL,
-	OverDraftTransactionXML XML NOT NULL,
-	CONSTRAINT Pk_ODL_AccountID PRIMARY KEY(AccountID),
-	CONSTRAINT fk_A_ODL_AccountID FOREIGN KEY(AccountID) REFERENCES Account(AccountID)
-);
+	[AccountID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END
 GO
 
---Q4. Insert at least 5 rows in each table. 
-/** INSERT rows section **/
-
-insert into UserLogins values('User1', 'Pass1');
-insert into UserLogins values('User2', 'Pass2');
-insert into UserLogins values('User3', 'Pass3');
-insert into UserLogins values('User4', 'Pass4');
-insert into UserLogins values('User5', 'Pass5');
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[SavingsInterestRates]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[SavingsInterestRates](
+	[InterestSavingRatesID] [tinyint] IDENTITY(1,1) NOT NULL,
+	[InterestRatesValue] [numeric](9, 9) NOT NULL,
+	[InterestRatesDescription] [nvarchar](20) NOT NULL,
+ CONSTRAINT [pk_SIR_InterestSavingRatesID] PRIMARY KEY CLUSTERED 
+(
+	[InterestSavingRatesID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
 GO
 
-insert into UserSecurityQuestions values('What is your favourite food?');
-insert into UserSecurityQuestions values('What is your favourite food?');
-insert into UserSecurityQuestions values('What is your favourite food?');
-insert into UserSecurityQuestions values('What is your favourite food?');
-insert into UserSecurityQuestions values('What is your favourite food?');
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TransactionLog]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[TransactionLog](
+	[TransactionID] [int] IDENTITY(1,1) NOT NULL,
+	[TransactionDate] [datetime] NOT NULL,
+	[TransactionTypeID] [tinyint] NOT NULL,
+	[TransactionAmount] [money] NOT NULL,
+	[NewBalance] [money] NOT NULL,
+	[AccountID] [int] NOT NULL,
+	[CustomerID] [int] NOT NULL,
+	[EmployeeID] [int] NOT NULL,
+	[UserLoginID] [smallint] NOT NULL,
+ CONSTRAINT [pk_TL_TransactionID] PRIMARY KEY CLUSTERED 
+(
+	[TransactionID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
 GO
 
-Insert into AccountType values('Savings');
-Insert into AccountType values('Checking');
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TransactionType]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[TransactionType](
+	[TransactionTypeID] [tinyint] IDENTITY(1,1) NOT NULL,
+	[TransactionTypeName] [nchar](10) NOT NULL,
+	[TransactionTypeDescription] [nvarchar](50) NULL,
+	[TransactionFeeAmount] [smallmoney] NULL,
+ CONSTRAINT [pk_TT_TransactionTypeID] PRIMARY KEY CLUSTERED 
+(
+	[TransactionTypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
 GO
 
---Inserting 5 records into table SavingsInterestRates
-insert into SavingsInterestRates values(0.5, 'Low');
-insert into SavingsInterestRates values(2, 'Medium');
-insert into SavingsInterestRates values(3, 'High');
-insert into SavingsInterestRates values(4, 'Very high');
-insert into SavingsInterestRates values(5, 'Super high');
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserLogins]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[UserLogins](
+	[UserLoginID] [smallint] IDENTITY(1,1) NOT NULL,
+	[UserLogin] [nvarchar](50) NOT NULL,
+	[UserPassword] [nvarchar](20) NOT NULL,
+ CONSTRAINT [pk_UL_UserLoginID] PRIMARY KEY CLUSTERED 
+(
+	[UserLoginID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
 GO
 
-select * from AccountStatusType;
-insert into AccountStatusType values('Closed');
-insert into AccountStatusType values('Active');
-insert into AccountStatusType values('Dormant');
-insert into AccountStatusType values('Passive');
-insert into AccountStatusType values('Active');
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[UserSecurityAnswers](
+	[UserLoginID] [smallint] IDENTITY(1,1) NOT NULL,
+	[UserSecurityAnswers] [nvarchar](25) NOT NULL,
+	[UserSecurityQuestionID] [tinyint] NOT NULL,
+ CONSTRAINT [pk_USA_UserLoginID] PRIMARY KEY CLUSTERED 
+(
+	[UserLoginID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
 GO
 
-insert into FailedTransactionErrorType values('Withdraw limit reached');
-insert into FailedTransactionErrorType values('Daily limit reached');
-insert into FailedTransactionErrorType values('No tenough balance');
-insert into FailedTransactionErrorType values('Invalid denomination');
-insert into FailedTransactionErrorType values('ATM machine down');
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UserSecurityQuestions]') AND type in (N'U'))
+BEGIN
+CREATE TABLE [dbo].[UserSecurityQuestions](
+	[UserSecurityQuestionID] [tinyint] IDENTITY(1,1) NOT NULL,
+	[UserSecurityQuestion] [nvarchar](50) NOT NULL,
+ CONSTRAINT [pk_USQ_UserSecurityQuestionID] PRIMARY KEY CLUSTERED 
+(
+	[UserSecurityQuestionID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+END
 GO
 
-insert into LoginErrorLog values(TRY_CAST('2015/6/4 07:30:56' AS DATETIME), 'Bad Connection');
-insert into LoginErrorLog values(TRY_CAST('2018/6/9 12:34:57' AS DATETIME), 'Invalid User');
-insert into LoginErrorLog values(TRY_CAST('2016/4/5 02:14:00' AS DATETIME), 'Wrong Password');
-insert into LoginErrorLog values(TRY_CAST('2014/7/5 05:56:59' AS DATETIME), 'Server issue');
-insert into LoginErrorLog values(TRY_CAST('2009/10/12 08:34:15' AS DATETIME), 'Datacenter down');
+-- Create all constraints. If they do not exist then alter the table to add them.
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK__Account__Account__4F7CD00D]') AND parent_object_id = OBJECT_ID(N'[dbo].[Account]'))
+ALTER TABLE [dbo].[Account]  WITH CHECK ADD FOREIGN KEY([AccountTypeID])
+REFERENCES [dbo].[AccountType] ([AccountTypeID])
 GO
 
-insert into Employee values('E3', 'K', 'E3', '0');
-insert into Employee values('E5', 'B', 'E5', '1');
-insert into Employee values('E7', 'P', 'E7', '0');
-insert into Employee values('E9', 'R', 'E9', '1');
-insert into Employee values('E11', 'K', 'E11', '1');
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_AST_AccountStatusTypeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Account]'))
+ALTER TABLE [dbo].[Account]  WITH CHECK ADD  CONSTRAINT [fk_AST_AccountStatusTypeID] FOREIGN KEY([AccountStatusTypeID])
+REFERENCES [dbo].[AccountStatusType] ([AccountStatusTypeID])
 GO
 
-insert into TransactionType values('Balance', 'See money', '0');
-insert into TransactionType values('Transfer', 'Send money', '450');
-insert into TransactionType values('Receive', 'Get money', '300');
-insert into TransactionType values('Paid', 'Paid to John', '45000');
-insert into TransactionType values('Statement', 'Checked monthly transaction', '0');
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_AST_AccountStatusTypeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Account]'))
+ALTER TABLE [dbo].[Account] CHECK CONSTRAINT [fk_AST_AccountStatusTypeID]
 GO
 
-insert into FailedTransactionLog values(1, TRY_CAST('2015/6/4 07:30:56' AS DATETIME), 'First');
-insert into FailedTransactionLog values(2, TRY_CAST('2018/6/9 12:34:57' AS DATETIME), 'Second');
-insert into FailedTransactionLog values(3, TRY_CAST('2016/4/5 02:14:00' AS DATETIME), 'Third');
-insert into FailedTransactionLog values(4, TRY_CAST('2014/7/5 05:56:59' AS DATETIME), 'Fourth');
-insert into FailedTransactionLog values(5, TRY_CAST('2009/10/12 08:34:15' AS DATETIME), 'Fifth');
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_SIR_InterestSavingRatesID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Account]'))
+ALTER TABLE [dbo].[Account]  WITH CHECK ADD  CONSTRAINT [fk_SIR_InterestSavingRatesID] FOREIGN KEY([InterestSavingRatesID])
+REFERENCES [dbo].[SavingsInterestRates] ([InterestSavingRatesID])
 GO
 
-insert into UserSecurityAnswers values('Apples', 1);
-insert into UserSecurityAnswers values('Spiderman', 2);
-insert into UserSecurityAnswers values('School1', 3);
-insert into UserSecurityAnswers values('Ram', 4);
-insert into UserSecurityAnswers values('Toyota', 5);
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_SIR_InterestSavingRatesID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Account]'))
+ALTER TABLE [dbo].[Account] CHECK CONSTRAINT [fk_SIR_InterestSavingRatesID]
 GO
 
-insert into Account values(15000.7, 1, 1, 1);
-insert into Account values(25000.5, 2, 2, 2);
-insert into Account values(17000.2, 1, 1, 1);
-insert into Account values(45000, 2, 2, 2);
-insert into Account values(2320, 2, 2, 2);
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Customer]'))
+ALTER TABLE [dbo].[Customer]  WITH CHECK ADD  CONSTRAINT [fk_A_AccountID] FOREIGN KEY([AccountID])
+REFERENCES [dbo].[Account] ([AccountID])
 GO
 
-insert into LoginAccount values(1, 1);
-insert into LoginAccount values(2, 2);
-insert into LoginAccount values(3, 3);
-insert into LoginAccount values(4, 4);
-insert into LoginAccount values(5, 5);
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Customer]'))
+ALTER TABLE [dbo].[Customer] CHECK CONSTRAINT [fk_A_AccountID]
 GO
 
-insert into Customer values(1, 'Address1', 'Address2', 'Customer1', 'U', 'CLastname1', 'Ottawa', 'ON', '3A5z9z', 'user5@user.com', '141655555', '453554464', '3462325', 'A12345', 1);
-insert into Customer values(2, 'Address1', 'Address2', 'Customer2', 'K', 'CLastname2', 'Hamilton', 'ON', 'fe3453', 'user6@user.com', '141655555', '567435345', '6332423', 'D34353', 2);
-insert into Customer values(3, 'Address1', 'Address2', 'Customer3', 'P', 'CLastname3', 'Vacouver', 'BC', 'fdf45', 'user7@user.com', '141655555', '681316226', '9202521', 'J56361', 3);
-insert into Customer values(4, 'Address1', 'Address2', 'Customer4', 'B', 'CLastname4', 'London', 'ON', '23ffbfs', 'user8@user.com', '141655555', '795197107', '8674252', 'I78369', 4);
-insert into Customer values(5, 'Address1', 'Address2', 'Customer5', 'K', 'CLastname5', 'Calgary', 'AB', 'hg4536', 'user9@user.com', '141655555', '909077988', '9209371', 'K10377', 5);
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_C_UserLoginID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Customer]'))
+ALTER TABLE [dbo].[Customer]  WITH CHECK ADD  CONSTRAINT [fk_UL_C_UserLoginID] FOREIGN KEY([UserLoginID])
+REFERENCES [dbo].[UserLogins] ([UserLoginID])
 GO
 
-insert into CustomerAccount values(1, 1);
-insert into CustomerAccount values(2, 2);
-insert into CustomerAccount values(3, 3);
-insert into CustomerAccount values(4, 4);
-insert into CustomerAccount values(5, 5);
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_C_UserLoginID]') AND parent_object_id = OBJECT_ID(N'[dbo].[Customer]'))
+ALTER TABLE [dbo].[Customer] CHECK CONSTRAINT [fk_UL_C_UserLoginID]
 GO
 
-insert into TransactionLog values('2015/6/4 07:30:56', 1,15000.7, 7869878, 1, 1, 1, 1);
-insert into TransactionLog values('2018/6/9 12:34:57', 2,435435, 675687, 2, 2, 2, 2);
-insert into TransactionLog values('2016/4/5 02:14:00', 3,855869.3, 34512356, 3, 3, 3, 3);
-insert into TransactionLog values('2014/7/5 05:56:59', 4,1276303.6, 4643234, 4, 4, 4, 4);
-insert into TransactionLog values('2009/10/12 08:34:15', 5,1696737.9, 325344, 5, 5, 5, 5);
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_CA_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[CustomerAccount]'))
+ALTER TABLE [dbo].[CustomerAccount]  WITH CHECK ADD  CONSTRAINT [fk_A_CA_AccountID] FOREIGN KEY([AccountID])
+REFERENCES [dbo].[Account] ([AccountID])
 GO
 
-insert into OverDraftLog values('2015/6/4 07:30:56', 0, 'Clear');
-insert into OverDraftLog values('2018/6/9 12:34:57', 5, 'Pending');
-insert into OverDraftLog values('2016/4/5 02:14:00', 10, 'Clear');
-insert into OverDraftLog values('2014/7/5 05:56:59', 15, 'Pending');
-insert into OverDraftLog values('2009/10/12 08:34:15', 20, 'Clear');
-
-
--- PHASE II of project begins
-
---Q1. Create a view to get all customers with checking account from ON province. 
-
-DROP VIEW VW_Customer_ON;
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_CA_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[CustomerAccount]'))
+ALTER TABLE [dbo].[CustomerAccount] CHECK CONSTRAINT [fk_A_CA_AccountID]
 GO
 
-CREATE VIEW VW_Customer_ON AS
-SELECT DISTINCT c.* FROM Customer c
-JOIN Account a
-ON c.AccountID = a.AccountId
-JOIN AccountType at
-ON a.AccountTypeID = at.AccountTypeID
-WHERE at.AccountTypeDescription = 'Checking' and c.State = 'ON';
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_C_CA_CustomerID]') AND parent_object_id = OBJECT_ID(N'[dbo].[CustomerAccount]'))
+ALTER TABLE [dbo].[CustomerAccount]  WITH CHECK ADD  CONSTRAINT [fk_C_CA_CustomerID] FOREIGN KEY([CustomerID])
+REFERENCES [dbo].[Customer] ([CustomerID])
 GO
 
---Q2. Create a view to get all customers with total account balance (including interest rate) greater than 5000. 
-
-DROP VIEW VW_Customer_AMT;
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_C_CA_CustomerID]') AND parent_object_id = OBJECT_ID(N'[dbo].[CustomerAccount]'))
+ALTER TABLE [dbo].[CustomerAccount] CHECK CONSTRAINT [fk_C_CA_CustomerID]
 GO
 
-CREATE VIEW VW_Customer_ON AS
-SELECT c.CustomerFirstName, SUM(a.CurrentBalance) AS Ac_Balance, SUM(a.CurrentBalance + (a.CurrentBalance * s.InterestSavingRatesID)/100) AS Total_Ac_Balance 
-FROM Customer c
-JOIN Account a
-ON c.AccountID = a.AccountId
-JOIN SavingsInterestRates s
-ON a.InterestSavingRatesID = s.InterestSavingRatesID 
-GROUP BY c.CustomerFirstName
-HAVING SUM(a.CurrentBalance + (a.CurrentBalance * s.InterestRatesValue)/100) > 5000;
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_FTET_FailedTransactionErrorTypeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[FailedTransactionLog]'))
+ALTER TABLE [dbo].[FailedTransactionLog]  WITH CHECK ADD  CONSTRAINT [fk_FTET_FailedTransactionErrorTypeID] FOREIGN KEY([FailedTransactionErrorTypeID])
+REFERENCES [dbo].[FailedTransactionErrorType] ([FailedTransactionErrorTypeID])
 GO
 
---Q3. Create a view to get counts of checking and savings accounts by customer. 
-
-DROP VIEW VW_Customer_ACC;
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_FTET_FailedTransactionErrorTypeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[FailedTransactionLog]'))
+ALTER TABLE [dbo].[FailedTransactionLog] CHECK CONSTRAINT [fk_FTET_FailedTransactionErrorTypeID]
 GO
 
-CREATE VIEW VW_Customer_ACC 
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_Account]') AND parent_object_id = OBJECT_ID(N'[dbo].[LoginAccount]'))
+ALTER TABLE [dbo].[LoginAccount]  WITH CHECK ADD  CONSTRAINT [fk_A_Account] FOREIGN KEY([AccountID])
+REFERENCES [dbo].[Account] ([AccountID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_Account]') AND parent_object_id = OBJECT_ID(N'[dbo].[LoginAccount]'))
+ALTER TABLE [dbo].[LoginAccount] CHECK CONSTRAINT [fk_A_Account]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_UserLogins]') AND parent_object_id = OBJECT_ID(N'[dbo].[LoginAccount]'))
+ALTER TABLE [dbo].[LoginAccount]  WITH CHECK ADD  CONSTRAINT [fk_UL_UserLogins] FOREIGN KEY([UserLoginID])
+REFERENCES [dbo].[UserLogins] ([UserLoginID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_UserLogins]') AND parent_object_id = OBJECT_ID(N'[dbo].[LoginAccount]'))
+ALTER TABLE [dbo].[LoginAccount] CHECK CONSTRAINT [fk_UL_UserLogins]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_ODL_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[OverDraftLog]'))
+ALTER TABLE [dbo].[OverDraftLog]  WITH CHECK ADD  CONSTRAINT [fk_A_ODL_AccountID] FOREIGN KEY([AccountID])
+REFERENCES [dbo].[Account] ([AccountID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_ODL_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[OverDraftLog]'))
+ALTER TABLE [dbo].[OverDraftLog] CHECK CONSTRAINT [fk_A_ODL_AccountID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_TL_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog]  WITH CHECK ADD  CONSTRAINT [fk_A_TL_AccountID] FOREIGN KEY([AccountID])
+REFERENCES [dbo].[Account] ([AccountID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_A_TL_AccountID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog] CHECK CONSTRAINT [fk_A_TL_AccountID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_C_TL_CustomerID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog]  WITH CHECK ADD  CONSTRAINT [fk_C_TL_CustomerID] FOREIGN KEY([CustomerID])
+REFERENCES [dbo].[Customer] ([CustomerID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_C_TL_CustomerID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog] CHECK CONSTRAINT [fk_C_TL_CustomerID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_E_TL_EmployeeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog]  WITH CHECK ADD  CONSTRAINT [fk_E_TL_EmployeeID] FOREIGN KEY([EmployeeID])
+REFERENCES [dbo].[Employee] ([EmployeeID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_E_TL_EmployeeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog] CHECK CONSTRAINT [fk_E_TL_EmployeeID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_TT_TL_TransactionTypeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog]  WITH CHECK ADD  CONSTRAINT [fk_TT_TL_TransactionTypeID] FOREIGN KEY([TransactionTypeID])
+REFERENCES [dbo].[TransactionType] ([TransactionTypeID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_TT_TL_TransactionTypeID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog] CHECK CONSTRAINT [fk_TT_TL_TransactionTypeID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_TL_UserLoginID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog]  WITH CHECK ADD  CONSTRAINT [fk_UL_TL_UserLoginID] FOREIGN KEY([UserLoginID])
+REFERENCES [dbo].[UserLogins] ([UserLoginID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_TL_UserLoginID]') AND parent_object_id = OBJECT_ID(N'[dbo].[TransactionLog]'))
+ALTER TABLE [dbo].[TransactionLog] CHECK CONSTRAINT [fk_UL_TL_UserLoginID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_UserLoginID]') AND parent_object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]'))
+ALTER TABLE [dbo].[UserSecurityAnswers]  WITH CHECK ADD  CONSTRAINT [fk_UL_UserLoginID] FOREIGN KEY([UserLoginID])
+REFERENCES [dbo].[UserLogins] ([UserLoginID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_UL_UserLoginID]') AND parent_object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]'))
+ALTER TABLE [dbo].[UserSecurityAnswers] CHECK CONSTRAINT [fk_UL_UserLoginID]
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_USQ_UserSecurityQuestionID]') AND parent_object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]'))
+ALTER TABLE [dbo].[UserSecurityAnswers]  WITH CHECK ADD  CONSTRAINT [fk_USQ_UserSecurityQuestionID] FOREIGN KEY([UserSecurityQuestionID])
+REFERENCES [dbo].[UserSecurityQuestions] ([UserSecurityQuestionID])
+GO
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[fk_USQ_UserSecurityQuestionID]') AND parent_object_id = OBJECT_ID(N'[dbo].[UserSecurityAnswers]'))
+ALTER TABLE [dbo].[UserSecurityAnswers] CHECK CONSTRAINT [fk_USQ_UserSecurityQuestionID]
+GO
+
+
+-- Create the views if they do not exist
+IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[VW_Customer_ACC]'))
+EXEC dbo.sp_executesql @statement = N'
+CREATE VIEW [dbo].[VW_Customer_ACC] 
 AS
 SELECT c.CustomerFirstName, at.AccountTypeDescription, COUNT(*) AS Total_AC_Types FROM Customer c
 JOIN Account a
@@ -450,57 +438,40 @@ ON c.AccountID = a.AccountId
 JOIN AccountType at
 ON a.AccountTypeID = at.AccountTypeID
 GROUP BY c.CustomerFirstName, at.AccountTypeDescription;
+' 
 GO
 
---Q4. Create a view to get any particular user�s login and password using AccountId. 
-
-DROP VIEW VW_Account_UL;
-GO
-
-CREATE VIEW VW_Account_UL 
-AS
-SELECT DISTINCT ul.UserLogin, ul.UserPassword
-FROM UserLogins ul
-JOIN LoginAccount la
-ON ul.UserLoginID = la.UserLoginID
---JOIN Account a
---ON la.AccountID = a.AccountID;
-WHERE la.AccountID = '1'
-GO;
-
-
---Q5. Create a view to get all customers� overdraft amount. 
-
-DROP VIEW VW_Customer_OD;
-GO
-
-CREATE VIEW VW_Customer_OD 
+IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[VW_Customer_OD]'))
+EXEC dbo.sp_executesql @statement = N'
+CREATE VIEW [dbo].[VW_Customer_OD] 
 AS
 SELECT DISTINCT c.CustomerFirstName, o.OverDraftAmount
 FROM OverDraftLog o
 JOIN Customer c
 ON o.AccountID = c.AccountID;
+' 
 GO
 
---Q6. Create a stored procedure to add "User_" as a prefix to everyone's login (username). 
-
-DROP PROCEDURE sp_Update_Login;
+IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[VW_Customer_ON]'))
+EXEC dbo.sp_executesql @statement = N'
+CREATE VIEW [dbo].[VW_Customer_ON] AS
+SELECT DISTINCT c.* FROM Customer c
+JOIN Account a
+ON c.AccountID = a.AccountId
+JOIN AccountType at
+ON a.AccountTypeID = at.AccountTypeID
+WHERE at.AccountTypeDescription = ''Checking'' and c.State = ''ON'';
+' 
 GO
 
-CREATE PROCEDURE sp_Update_Login
-AS
-UPDATE UserLogins
-SET UserLogin = Concat('User_', UserLogin);
-GO
-EXEC sp_Update_Login;
-GO
-
---Q7. Create a stored procedure that accepts AccountId as a parameter and returns customer's full name. 
-
-DROP PROCEDURE sp_Customer_Details;
+-- Create all stored procedures. Only create if they do not exist; Otherwise, alter the existing stored procedure
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Customer_Details]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Customer_Details] AS' 
+END
 GO
 
-CREATE PROCEDURE sp_Customer_Details @AccountID INT
+ALTER PROCEDURE [dbo].[sp_Customer_Details] @AccountID INT
 AS
 SELECT c.CustomerFirstName + ' ' + c.CustomerMIddleInitial + ' ' + c.CustomerLastName AS Customer_Full_Name
 FROM Customer c
@@ -509,61 +480,25 @@ ON c.AccountID = a.AccountId
 WHERE a.AccountID = @AccountID;
 GO
 
-EXEC sp_Costumer_Details 2;
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Delete_Errors]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Delete_Errors] AS' 
+END
 GO
 
-
---Q8. Create a stored procedure that returns error logs inserted in the last 24 hours. 
-
-DROP PROCEDURE sp_Errors_24;
-GO
-
-CREATE PROCEDURE sp_Errors_24
+ALTER PROCEDURE [dbo].[sp_Delete_Errors]
 AS
-SELECT * FROM LoginErrorLog
-WHERE  ErrorTime BETWEEN DATEADD(hh, -24, GETDATE()) AND GETDATE();
+delete FROM LoginErrorLog
+WHERE  ErrorTime BETWEEN DATEADD(hh, -1, GETDATE()) AND GETDATE();
 GO
 
-EXEC sp_Errors_24;
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Delete_Question]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Delete_Question] AS' 
+END
 GO
 
---Q9. Create a stored procedure that takes a deposit as a parameter and updates CurrentBalance value for that particular account.  
-
-DROP PROCEDURE sp_Update_cBalance_After_Deposit;
-GO
-
-CREATE PROCEDURE sp_Update_cBalance_After_Deposit @AccountID INT, @Deposit INT
-AS
-UPDATE Account
-SET CurrentBalance = CurrentBalance + @Deposit
-where AccountID = @AccountID;
-GO
-
-EXEC sp_Update_cBalance_After_Deposit 3, 300;
-GO
-
---Q10. Create a stored procedure that takes a withdrawal amount as a parameter and updates CurrentBalance value for that particular account. 
-
-DROP PROCEDURE sp_Update_cBalance_After_Withdraw;
-GO
-
-CREATE PROCEDURE sp_Update_cBalance_After_Withdraw @AccountID INT, @Withdraw INT
-AS
-UPDATE Account
-SET CurrentBalance = CurrentBalance - @Withdraw
-WHERE AccountID = @AccountID;
-GO
-
-EXEC sp_Update_cBalance_After_Withdraw 3, 300;
-GO
-
-
---Q11. Create a stored procedure to remove all security questions for a particular login. 
-
-DROP PROCEDURE sp_Delete_Question;
-GO
-
-CREATE PROCEDURE sp_Delete_Question @UserLoginID SMALLINT
+ALTER PROCEDURE [dbo].[sp_Delete_Question] @UserLoginID SMALLINT
 AS
 DELETE UserSecurityQuestions
 FROM UserSecurityQuestions uq
@@ -574,33 +509,64 @@ ON ua.UserLoginID = ul.UserLoginID
 WHERE ul.UserLoginID = @UserLoginID;
 GO
 
-EXEC sp_Delete_Question 5;
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Errors_24]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Errors_24] AS' 
+END
 GO
 
---Q12. Delete all error logs created in the last hour. 
-
-DROP PROCEDURE sp_Delete_Errors;
-GO
-
-CREATE PROCEDURE sp_Delete_Errors
+ALTER PROCEDURE [dbo].[sp_Errors_24]
 AS
-delete FROM LoginErrorLog
-WHERE  ErrorTime BETWEEN DATEADD(hh, -1, GETDATE()) AND GETDATE();
+SELECT * FROM LoginErrorLog
+WHERE  ErrorTime BETWEEN DATEADD(hh, -24, GETDATE()) AND GETDATE();
 GO
 
-EXEC sp_Delete_Errors;
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Remove_Column]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Remove_Column] AS' 
+END
 GO
 
---Q13. Write a query to remove SSN column from Customer table. 
-
-DROP PROCEDURE sp_Remove_Column;
-GO
-
-CREATE PROCEDURE sp_Remove_Column
+ALTER PROCEDURE [dbo].[sp_Remove_Column]
 AS
 ALTER TABLE CUSTOMER
 DROP COLUMN CustomerAddress1;
 GO
 
-EXEC sp_Remove_Column;
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Update_cBalance_After_Deposit]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Update_cBalance_After_Deposit] AS' 
+END
+GO
+
+ALTER PROCEDURE [dbo].[sp_Update_cBalance_After_Deposit] @AccountID INT, @Deposit INT
+AS
+UPDATE Account
+SET CurrentBalance = CurrentBalance + @Deposit
+where AccountID = @AccountID;
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Update_cBalance_After_Withdraw]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Update_cBalance_After_Withdraw] AS' 
+END
+GO
+
+ALTER PROCEDURE [dbo].[sp_Update_cBalance_After_Withdraw] @AccountID INT, @Withdraw INT
+AS
+UPDATE Account
+SET CurrentBalance = CurrentBalance - @Withdraw
+WHERE AccountID = @AccountID;
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Update_Login]') AND type in (N'P', N'PC'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[sp_Update_Login] AS' 
+END
+GO
+
+ALTER PROCEDURE [dbo].[sp_Update_Login]
+AS
+UPDATE UserLogins
+SET UserLogin = Concat('User_', UserLogin);
 GO
